@@ -3,6 +3,8 @@ from flask_cors import CORS
 import psycopg2
 import os
 from dotenv import load_dotenv
+import socket
+
 
 load_dotenv()
 
@@ -10,6 +12,13 @@ app = Flask(__name__)
 CORS(app)
 
 def get_db_connection():
+    # Force IPv4 for DNS resolution
+    import socket
+    original_getaddrinfo = socket.getaddrinfo
+    def getaddrinfo_ipv4_only(*args, **kwargs):
+        return [info for info in original_getaddrinfo(*args, **kwargs) if info[0] == socket.AF_INET]
+    socket.getaddrinfo = getaddrinfo_ipv4_only
+
     return psycopg2.connect(
         dbname=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
