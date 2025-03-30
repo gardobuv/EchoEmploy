@@ -43,6 +43,19 @@ def submit():
     except Exception as e:
         print("Database error:", e)
         return jsonify({'message': 'Server error occurred.'}), 500
+    
+@app.route("/dbtest")
+def dbtest():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT NOW();")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return f"✅ DB is connected. Server time is: {result[0]}"
+    except Exception as e:
+        return f"❌ Database connection failed: {e}"    
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
